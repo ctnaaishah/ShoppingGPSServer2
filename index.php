@@ -53,33 +53,73 @@ $app->on("POST /barang", function() {
 
     // $this->json($this->body->harga); exit;
 
-    if (!$this->body->name && !$this->body->harga) {
-        $this->json(["error"=> "Harga dan barang required"])->end();
-    } else {
-        $dbh = db::connect();
-        $sql = "INSERT into from barang WHERE name=:name AND harga=:harga";
-        $param = [
-            ":name"=> $this->body->name,
-            ":harga"=> $this->body->harga,
-        ];
+    $dbh = db::connect();
+    $sql = "INSERT INTO barang(namabarang,harga,gambar,kategori) VALUES (:namabarang,:harga,:gambar,:kategori)";
+    $param1 = [
+        ":namabarang"=> $this->body->namabarang,
+        ":harga"=> $this->body->harga,
+        ":gambar"=> $this->body->gambar,
+        ":kategori"=> $this->body->kategori
+    ];
 
-        $query = $dbh->prepare($sql);
-        $query->execute($param);
+    $query = $dbh->prepare($sql);
+    $query->execute($param1);
 
-        $result = $query->fetch(PDO::FETCH_OBJ);
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        if($result) {
-            $this->json(["success"=> true, "data" => $result])->end();
-        } else {
-             $this->json(["message"=> "Wrong username/password"])->end();
-        }
-    }
+    $this->json($result)->end();
 
 });
 
+$app->on("POST /penjual", function() {
 
+    // $this->json($this->body->harga); exit;
 
+    $dbh = db::connect();
+    $sql = "INSERT INTO penjual(idpenjual,katalaluan,email,namakedai,alamat) VALUES (:idpenjual,:katalaluan,:email,:namakedai,:alamat)";
+    $param1 = [
+        ":idpenjual"=> $this->body->idpenjual,
+        ":katalaluan"=> $this->body->katalaluan,
+        ":email"=> $this->body->email,
+        ":namakedai"=> $this->body->namakedai,
+        ":alamat"=> $this->body->alamat
+    ];
 
+    $query = $dbh->prepare($sql);
+    $query->execute($param1);
+
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    $this->json($result)->end();
+
+});
+
+$app->on("POST /login", function() {
+
+    // $this->json($this->body); exit;
+
+    if (!$this->body['idpenjual'] && !$this->body['katalaluan']) {
+        $this->json(["message"=> "Gagal untuk log masuk"])->end();
+    }
+
+    $dbh = db::connect();
+    $sql = "SELECT (idpenjual,katalaluan) from penjual WHERE idpenjual=:idpenjual AND katalaluan=:katalaluan";
+    $param = [
+        ":idpenjual"=> $this->body['idpenjual'],
+        ":katalaluan"=> $this->body['katalaluan'],
+    ];
+
+    $query = $dbh->prepare($sql);
+    $query->execute($param);
+
+    $result = $query->fetch(PDO::FETCH_OBJ);
+
+    if($result) {
+        $this->json(["success"=> true, "data" => $result])->end();
+    } else {
+         $this->json(["message"=> "Salah id penjual/katalaluan"])->end();
+    }
+});
 
 
 
@@ -92,7 +132,7 @@ $app->on("POST /barang", function() {
 
 /*fetch username and password*/
 
-$app->on("POST /login", function() {
+/*$app->on("POST /login", function() {
 
     // $this->json($this->body); exit;
 
@@ -122,7 +162,7 @@ $app->on("POST /login", function() {
 
 /*create devices*/
 
-$app->on("POST /devices", function() {
+/*$app->on("POST /devices", function() {
 
     $dbh = db::connect();
     $sql = "INSERT INTO devices(name,description) VALUES (:name,:description)";
@@ -142,7 +182,7 @@ $app->on("POST /devices", function() {
 
 /*update devices*/
 
-$app->on("PUT /devices", function() {
+/*$app->on("PUT /devices", function() {
 
     // TODO: Check exist status
 
@@ -166,7 +206,7 @@ $app->on("PUT /devices", function() {
 
 
 /*get devices*/
-$app->on("GET /devices", function() {
+/*$app->on("GET /devices", function() {
 
     $dbh = db::connect();
     $sql = "SELECT * from devices";
