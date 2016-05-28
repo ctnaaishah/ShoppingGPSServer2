@@ -14,8 +14,31 @@ $app->set([
 // $app->on("", function() {});
 $app->on("/", function() {
 
-    $this->end("Hello world", 200);
+    $this->end("Shopping GPS", 200);
 
+});
+
+/*delete user*/
+
+$app->on("POST/ akaun", function(){
+
+    $dbh = db::connect();
+    $sql = "DELETE ('idpenjual') from penjual WHERE ('idpenjual'=:idpenjual)";
+    
+    $param = [
+        ":idpenjual"=> $this->body->idpenjual
+    ];
+
+    $query = $dbh->prepare($sql);
+    $query->execute($param);
+
+    $result = $query->fetch(PDO::FETCH_OBJ);
+
+    if($result) {
+        $this->json([ "status" => $result, "message" => "Akaun berjaya dihapuskan !" ])->end();
+    } else {
+        $this->json($result)->end();
+    }
 });
 
 /*get all users*/
@@ -23,7 +46,7 @@ $app->on("/", function() {
 $app->on("GET /penjual", function() {
 
     $dbh = db::connect();
-    $sql = "SELECT * from Penjual";
+    $sql = "SELECT * from penjual";
 
     $query = $dbh->prepare($sql);
     $query->execute();
@@ -37,14 +60,16 @@ $app->on("GET /penjual", function() {
 
 $app->on("GET /barang", function() {
     $dbh = db::connect();
-    $sql = "SELECT * from Barang";
+    $sql = "SELECT * from barang";
 
     $query = $dbh->prepare($sql);
     $query->execute();
 
-    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+    $result = $query->fetchAll(PDO::FETCH_OBJ);
+
 
     $this->json($result)->end();
+    print_r($barang);
 
 });
 
@@ -54,21 +79,22 @@ $app->on("POST /barang", function() {
     // $this->json($this->body->harga); exit;
 
     $dbh = db::connect();
-    $sql = "INSERT INTO barang(namabarang,harga,gambar,kategori) VALUES (:namabarang,:harga,:gambar,:kategori)";
+    $sql = "INSERT INTO barang(namabarang,harga) VALUES (:namabarang,:harga)";
     $param1 = [
         ":namabarang"=> $this->body->namabarang,
         ":harga"=> $this->body->harga,
-        ":gambar"=> $this->body->gambar,
-        ":kategori"=> $this->body->kategori
     ];
 
     $query = $dbh->prepare($sql);
     $query->execute($param1);
 
-    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+    $result = $query->rowCount();
 
-    $this->json($result)->end();
-
+    if($result) {
+        $this->json([ "status" => $result, "message" => "Daftar berjaya!" ])->end();
+    } else {
+        $this->json($result)->end();
+    }
 });
 
 $app->on("POST /penjual", function() {
@@ -82,31 +108,33 @@ $app->on("POST /penjual", function() {
         ":katalaluan"=> $this->body->katalaluan,
         ":email"=> $this->body->email,
         ":namakedai"=> $this->body->namakedai,
-        ":alamat"=> $this->body->alamat
+        ":alamat"=> $this->body->alamat,
     ];
 
     $query = $dbh->prepare($sql);
     $query->execute($param1);
 
-    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+    $result = $query->rowCount();
 
-    $this->json($result)->end();
+    if($result) {
+        $this->json([ "status" => $result, "message" => "Daftar berjaya!" ])->end();
+    } else {
+        $this->json(["message"=> "Maaf. Daftar gagal"])->end();
+    }
 
 });
 
 $app->on("POST /login", function() {
 
-    // $this->json($this->body); exit;
-
-    if (!$this->body['idpenjual'] && !$this->body['katalaluan']) {
+    if (!$this->body->idpenjual && !$this->body->katalaluan) {
         $this->json(["message"=> "Gagal untuk log masuk"])->end();
     }
 
     $dbh = db::connect();
-    $sql = "SELECT (idpenjual,katalaluan) from penjual WHERE idpenjual=:idpenjual AND katalaluan=:katalaluan";
+    $sql = "SELECT * from penjual WHERE idpenjual=:idpenjual AND katalaluan=:katalaluan";
     $param = [
-        ":idpenjual"=> $this->body['idpenjual'],
-        ":katalaluan"=> $this->body['katalaluan'],
+        ":idpenjual"=> $this->body->idpenjual,
+        ":katalaluan"=> $this->body->katalaluan,
     ];
 
     $query = $dbh->prepare($sql);
@@ -218,6 +246,6 @@ $app->on("POST /login", function() {
 
     $this->json($result)->end();
 
-});
-
+});*/
+?>
 
